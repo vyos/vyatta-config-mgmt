@@ -1,0 +1,8 @@
+The Debian Package vyatta-config-mgmt
+---------------------------------
+
+This package has the Vyatta configuration/operational templates and scripts
+for configuration management.
+
+ -- Stig Thormodsrud <stig@vyatta.com> Tue, 26 Oct 2010
+

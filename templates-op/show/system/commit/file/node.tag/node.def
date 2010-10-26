@@ -1,0 +1,4 @@
+help: show commit revision file
+run: ${vyatta_sbindir}/vyatta-config-mgmt.pl  \
+        --action=show-commit-file             \
+        --revnum="$5"

@@ -1,0 +1,2 @@
+vyatta-config-mgmt: file-in-unusual-dir
+vyatta-config-mgmt: dir-or-file-in-opt

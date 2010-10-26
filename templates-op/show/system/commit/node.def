@@ -1,0 +1,3 @@
+help: Show commit revisions log
+run: ${vyatta_sbindir}/vyatta-config-mgmt.pl --action=show-commit-log
+

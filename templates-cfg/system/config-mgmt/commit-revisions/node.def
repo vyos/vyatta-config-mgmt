@@ -1,0 +1,12 @@
+type: u32
+priority: 400
+help: Commit revisions
+
+update: sudo ${vyatta_sbindir}/vyatta-config-mgmt.pl \
+                 --action=update-revs                \
+                 --revs="$VAR(@)"
+
+val_help: u32:0-65535 ; Number of config backups to keep
+
+syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 65535 ; \
+	"Commit revisions must be in range 0 to 65535"

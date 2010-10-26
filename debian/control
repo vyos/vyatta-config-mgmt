@@ -1,0 +1,15 @@
+Source: vyatta-config-mgmt
+Section: contrib/net
+Priority: extra
+Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: vyatta-config-mgmt
+Architecture: all
+Depends: perl,
+ vyatta-cfg (>= 0.15.33),
+ vyatta-cfg-system,
+ vyatta-op,
+Description: Vyatta commands for config-mgmt
+ Vyatta configuration/operational templates and scripts for the config management  system.

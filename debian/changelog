@@ -1,0 +1,6 @@
+vyatta-config-mgmt (0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 26 Oct 2010 10:54:14 -0700
+
