@@ -118,7 +118,7 @@ sub cm_commit_get_log {
     my @lines = cm_read_file($commit_log_file);
     
     my @commit_log = ();
-    my $count = 0;
+    my $count = 1;
     foreach my $line (@lines) {
         if ($line !~ /^\|(.*)\|$/) {
             print "Invalid log format [$line]\n";

@@ -41,7 +41,7 @@ use URI;
 my $debug = 0;
 
 my $config = new Vyatta::Config;
-$config->setLevel('system config-mgmt');
+$config->setLevel('system config-mgmt remote-archive');
 my @uris = $config->returnOrigValues('commit-uri');
 
 if (scalar(@uris) < 1) {
