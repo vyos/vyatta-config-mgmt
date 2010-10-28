@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.2) unstable; urgency=low
+
+  * Move commit-uri under remote-archive.
+  * Add .gitignore
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Thu, 28 Oct 2010 11:29:20 -0700
+
 vyatta-config-mgmt (0.1) unstable; urgency=low
 
   * Initial Release.
