@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.3) unstable; urgency=low
+
+  * Add revision compare functionality
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 02 Nov 2010 17:39:47 -0700
+
 vyatta-config-mgmt (0.2) unstable; urgency=low
 
   * Move commit-uri under remote-archive.
