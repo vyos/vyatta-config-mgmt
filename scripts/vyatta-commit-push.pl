@@ -36,6 +36,7 @@ use Vyatta::Config;
 use POSIX;
 use File::Basename;
 use URI;
+use WWW::Curl::Easy;
 
 
 my $debug = 0;
@@ -52,7 +53,7 @@ if (scalar(@uris) < 1) {
 my $upload_file = '/opt/vyatta/etc/config/config.boot';
 
 my $timestamp = strftime("_%Y%m%d_%H%M%S", localtime);
-my $same_file = basename($upload_file) . $timestamp;
+my $save_file = basename($upload_file) . $timestamp;
 
 print "Archiving config...\n";
 foreach my $uri (@uris) {
@@ -68,15 +69,19 @@ foreach my $uri (@uris) {
     }
     $remote .= "$scheme://$host";
     $remote .= "$path" if defined $path;
-
     print "  $remote ";
-    my $cmd = "curl -s -T $upload_file $uri/$same_file";
-    print "cmd [$cmd]\n" if $debug;
-    my $rc = system($cmd);
-    if ($rc eq 0) {
-        print " OK\n";
+    open(my $FILE, '<', $upload_file) or die "Error: read $!";
+    my $curl = new WWW::Curl::Easy;
+    $curl->setopt(CURLOPT_NOPROGRESS, 1);
+    $curl->setopt(CURLOPT_URL, "$uri/$save_file");
+    $curl->setopt(CURLOPT_UPLOAD, 1);
+    $curl->setopt(CURLOPT_INFILE, $FILE);
+    $curl->setopt(CURLOPT_VERBOSE, $debug);
+    my $retcode = $curl->perform;
+    if ($retcode == 0) {
+        print "Ok\n";
     } else {
-        print " failed\n";
+        print "Failed: " . $curl->strerror($retcode) . "\n";
     }
 }
 
