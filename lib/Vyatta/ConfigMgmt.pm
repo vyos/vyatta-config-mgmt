@@ -29,7 +29,8 @@ use warnings;
 our @EXPORT = qw(cm_commit_add_log cm_commit_get_log cm_get_archive_dir 
                  cm_get_lr_conf_file cm_get_lr_state_file 
                  cm_get_commit_hook_dir cm_write_file cm_read_file
-                 cm_commit_get_file);
+                 cm_commit_get_file cm_commit_get_file_name
+                 cm_get_num_revs);
 use base qw(Exporter);
 
 use Vyatta::Config;
@@ -92,6 +93,14 @@ sub cm_get_max_revs {
     return $revs;
 }
 
+sub cm_get_num_revs {
+    
+    my @lines = cm_read_file($commit_log_file);
+    my $num_revs = scalar(@lines);
+    $num_revs-- if $num_revs > 0;  # rev files start at 0
+    return $num_revs;
+}
+
 sub cm_commit_add_log {
     my ($user, $via, $comment) = @_;
 
@@ -118,7 +127,7 @@ sub cm_commit_get_log {
     my @lines = cm_read_file($commit_log_file);
     
     my @commit_log = ();
-    my $count = 1;
+    my $count = 0;
     foreach my $line (@lines) {
         if ($line !~ /^\|(.*)\|$/) {
             print "Invalid log format [$line]\n";
@@ -139,6 +148,13 @@ sub cm_commit_get_log {
     return @commit_log;
 }
 
+sub cm_commit_get_file_name {
+    my ($revnum) = @_;
+
+    my $filename = $archive_dir . "/config.boot." . $revnum . ".gz";
+    return $filename;
+}
+
 sub cm_commit_get_file {
     my ($revnum) = @_;
 
@@ -148,7 +164,7 @@ sub cm_commit_get_file {
         exit 1;
     }
 
-    my $filename = $archive_dir . "/config.boot." . $revnum . ".gz";
+    my $filename = cm_commit_get_file_name($revnum);
     die "File [$filename] not found." if ! -e $filename;
 
     my $fh = new IO::Zlib;

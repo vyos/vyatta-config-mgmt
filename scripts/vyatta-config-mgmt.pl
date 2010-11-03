@@ -55,12 +55,21 @@ sub get_link {
     return $link;
 }
 
+sub check_valid_rev {
+    my ($rev) = @_;
+
+    my $num_revs = cm_get_num_revs();
+    return 1 if $rev <= $num_revs;
+    print "Invalid revision [$rev]\n";
+    exit 1;
+}
 
 #
 # main
 #
 my ($action, $uri, $revs, $revnum);
 
+Getopt::Long::Configure('pass_through');
 GetOptions("action=s"      => \$action,
            "uri=s"         => \$uri,
            "revs=i"        => \$revs,
@@ -136,6 +145,7 @@ if ($action eq 'update-revs') {
         }
         my $lr_conf = "$config_file {\n";
         $lr_conf   .= "\t rotate $revs\n";
+        $lr_conf   .= "\t start 0\n";
         $lr_conf   .= "\t compress \n";
         $lr_conf   .= "}\n";
         cm_write_file($lr_conf_file, $lr_conf);
@@ -158,6 +168,36 @@ if ($action eq 'show-commit-file') {
     print "show-commit-file [$revnum]\n" if $debug;
     my $file = cm_commit_get_file($revnum);
     print $file;
+}
+
+if ($action eq 'diff') {
+    print "diff\n" if $debug;    
+    my $args = $#ARGV;
+    if ($args < 0) {
+        my $tmp_config_file = "/tmp/config.boot.$$";
+        my $tmp_config_file2 = "/tmp/config.boot2.$$";
+        system("cli-shell-api showCfg --show-active-only> $tmp_config_file");
+        system("cli-shell-api showCfg > $tmp_config_file2");
+        my $diff = `diff -u -w $tmp_config_file2 $tmp_config_file`;
+        print $diff;
+        system("rm $tmp_config_file $tmp_config_file2");
+    } elsif ($args eq 0) {
+        my $rev1 = $ARGV[0];
+        check_valid_rev($rev1);
+        my $filename  = cm_commit_get_file_name(0);
+        my $filename2 = cm_commit_get_file_name($rev1);
+        my $diff = `zdiff -u $filename2 $filename`;
+        print $diff;
+    } elsif ($args eq 1) {
+        my $rev1 = $ARGV[0];
+        my $rev2 = $ARGV[1];
+        check_valid_rev($rev1);
+        check_valid_rev($rev2);
+        my $filename  = cm_commit_get_file_name($rev1);
+        my $filename2 = cm_commit_get_file_name($rev2);
+        my $diff = `zdiff -u $filename2 $filename`;
+        print $diff;
+    }
 }
 
 exit $rc;
