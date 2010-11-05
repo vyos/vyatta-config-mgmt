@@ -34,21 +34,26 @@ use lib '/opt/vyatta/share/perl5/';
 
 use Vyatta::Config;
 use Vyatta::ConfigMgmt;
+use File::Compare;
 
 #
 # main
 #
 
-my $archive_dir   = cm_get_archive_dir();
-my $lr_state_file = cm_get_lr_state_file();
-my $lr_conf_file  = cm_get_lr_conf_file();
+my $archive_dir      = cm_get_archive_dir();
+my $lr_state_file    = cm_get_lr_state_file();
+my $lr_conf_file     = cm_get_lr_conf_file();
+my $last_commit_file = cm_get_last_commit_file();
+my $tmp_config_file  = "/tmp/config.boot.$$";
 
 if (! -d $archive_dir) {
     system("sudo mkdir $archive_dir");
 }
 
-my $tmp_config_file = "/tmp/config.boot.$$";
 system("/opt/vyatta/sbin/vyatta-save-config.pl $tmp_config_file > /dev/null");
+if (compare($tmp_config_file, $last_commit_file) == 0) {
+    exit 0;
+}
 system("sudo mv $tmp_config_file $archive_dir/config.boot");
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
 my ($user) = getpwuid($<);

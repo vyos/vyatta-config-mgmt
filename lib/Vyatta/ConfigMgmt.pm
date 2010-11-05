@@ -30,7 +30,7 @@ our @EXPORT = qw(cm_commit_add_log cm_commit_get_log cm_get_archive_dir
                  cm_get_lr_conf_file cm_get_lr_state_file 
                  cm_get_commit_hook_dir cm_write_file cm_read_file
                  cm_commit_get_file cm_commit_get_file_name
-                 cm_get_num_revs);
+                 cm_get_num_revs cm_get_last_commit_file);
 use base qw(Exporter);
 
 use Vyatta::Config;
@@ -40,13 +40,14 @@ use POSIX;
 use IO::Zlib;
 
 
-my $commit_hook_dir = '/etc/commit/';
-my $config_dir      = '/opt/vyatta/etc/config';
-my $archive_dir     = "$config_dir/archive";
-my $config_file     = "$config_dir/config.boot";
-my $lr_conf_file    = "$archive_dir/lr.conf";
-my $lr_state_file   = "$archive_dir/lr.state";
-my $commit_log_file = "$archive_dir/commits";
+my $commit_hook_dir  = '/etc/commit/';
+my $config_dir       = '/opt/vyatta/etc/config';
+my $archive_dir      = "$config_dir/archive";
+my $config_file      = "$config_dir/config.boot";
+my $lr_conf_file     = "$archive_dir/lr.conf";
+my $lr_state_file    = "$archive_dir/lr.state";
+my $commit_log_file  = "$archive_dir/commits";
+my $last_commit_file = "$archive_dir/config.boot";
 
 
 sub cm_get_commit_hook_dir {
@@ -63,6 +64,10 @@ sub cm_get_lr_conf_file {
 
 sub cm_get_lr_state_file {
     return $lr_state_file;
+}
+
+sub cm_get_last_commit_file {
+    return $last_commit_file;
 }
 
 sub cm_read_file {

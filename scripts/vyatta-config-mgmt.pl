@@ -142,11 +142,13 @@ if ($action eq 'update-revs') {
         }
         if (! -e $archive_dir) {
             system("sudo mkdir $archive_dir");
+            system("sudo chown vyatta:vyattacfg $archive_dir");
         }
         my $lr_conf = "$config_file {\n";
         $lr_conf   .= "\t rotate $revs\n";
         $lr_conf   .= "\t start 0\n";
         $lr_conf   .= "\t compress \n";
+        $lr_conf   .= "\t copy \n";
         $lr_conf   .= "}\n";
         cm_write_file($lr_conf_file, $lr_conf);
         exit 0;
