@@ -6,6 +6,11 @@ update: sudo ${vyatta_sbindir}/vyatta-config-mgmt.pl \
                  --action=update-revs                \
                  --revs="$VAR(@)"
 
+delete: sudo ${vyatta_sbindir}/vyatta-config-mgmt.pl \
+                 --action=update-revs                \
+                 --revs="0"
+
+
 val_help: u32:0-65535 ; Number of config backups to keep
 
 syntax:expression: $VAR(@) >= 0 && $VAR(@) <= 65535 ; \

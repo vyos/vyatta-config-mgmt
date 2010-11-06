@@ -151,6 +151,12 @@ if ($action eq 'update-revs') {
         $lr_conf   .= "\t copy \n";
         $lr_conf   .= "}\n";
         cm_write_file($lr_conf_file, $lr_conf);
+        my $num_revs = cm_get_num_revs();
+        if ($num_revs == 0) {
+            # store a baseline config
+            system("$commit_revs_script baseline config.boot");
+            system("sudo chown vyatta:vyattacfg $archive_dir/*");
+        }
         exit 0;
     }
     exit 0;

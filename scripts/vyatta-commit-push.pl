@@ -33,8 +33,11 @@ use warnings;
 use lib '/opt/vyatta/share/perl5/';
 
 use Vyatta::Config;
+use Vyatta::ConfigMgmt;
 use POSIX;
 use File::Basename;
+use File::Compare;
+use File::Copy;
 use URI;
 use WWW::Curl::Easy;
 
@@ -50,10 +53,18 @@ if (scalar(@uris) < 1) {
     exit 0;
 }
 
-my $upload_file = '/opt/vyatta/etc/config/config.boot';
+my $last_push_file = cm_get_last_push_file();
+my $tmp_push_file  = "/tmp/config.boot-push.$$";
+
+my $cmd = 'cli-shell-api showCfg --show-active-only';
+system("$cmd > $tmp_push_file");
+
+if (-e $last_push_file and compare($last_push_file, $tmp_push_file) == 0) {
+    exit 0;
+}
 
 my $timestamp = strftime("_%Y%m%d_%H%M%S", localtime);
-my $save_file = basename($upload_file) . $timestamp;
+my $save_file = basename($tmp_push_file) . $timestamp;
 
 print "Archiving config...\n";
 foreach my $uri (@uris) {
@@ -70,7 +81,7 @@ foreach my $uri (@uris) {
     $remote .= "$scheme://$host";
     $remote .= "$path" if defined $path;
     print "  $remote ";
-    open(my $FILE, '<', $upload_file) or die "Error: read $!";
+    open(my $FILE, '<', $tmp_push_file) or die "Error: read $!";
     my $curl = new WWW::Curl::Easy;
     $curl->setopt(CURLOPT_NOPROGRESS, 1);
     $curl->setopt(CURLOPT_URL, "$uri/$save_file");
@@ -84,5 +95,6 @@ foreach my $uri (@uris) {
         print "Failed: " . $curl->strerror($retcode) . "\n";
     }
 }
+move($tmp_push_file, $last_push_file);
 
 exit 0;
