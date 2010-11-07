@@ -30,7 +30,7 @@ our @EXPORT = qw(cm_commit_add_log cm_commit_get_log cm_get_archive_dir
                  cm_get_lr_conf_file cm_get_lr_state_file 
                  cm_get_commit_hook_dir cm_write_file cm_read_file
                  cm_commit_get_file cm_commit_get_file_name
-                 cm_get_num_revs cm_get_last_commit_file 
+                 cm_get_max_revs cm_get_num_revs cm_get_last_commit_file 
                  cm_get_last_push_file);
 use base qw(Exporter);
 

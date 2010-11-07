@@ -142,7 +142,8 @@ if ($action eq 'update-revs') {
         }
         if (! -e $archive_dir) {
             system("sudo mkdir $archive_dir");
-            system("sudo chown vyatta:vyattacfg $archive_dir");
+            system("sudo chgrp vyattacfg $archive_dir");
+            system("sudo chmod 775 $archive_dir");
         }
         my $lr_conf = "$config_file {\n";
         $lr_conf   .= "\t rotate $revs\n";
@@ -154,9 +155,12 @@ if ($action eq 'update-revs') {
         my $num_revs = cm_get_num_revs();
         if ($num_revs == 0) {
             # store a baseline config
+            system("sudo touch $archive_dir/commits");
+            system("sudo chgrp vyattacfg $archive_dir/commits");
+            system("sudo chmod 664 $archive_dir/commits");
             system("$commit_revs_script baseline config.boot");
-            system("sudo chown vyatta:vyattacfg $archive_dir/*");
         }
+        print "done\n";
         exit 0;
     }
     exit 0;
@@ -164,6 +168,10 @@ if ($action eq 'update-revs') {
 
 if ($action eq 'show-commit-log') {
     print "show-commit-log\n" if $debug;
+    my $max_revs = cm_get_max_revs();
+    if (!defined $max_revs or $max_revs <= 0) {
+        print "commit-revisions is not configured.\n\n";
+    }
     my @log = cm_commit_get_log();
     foreach my $line (@log) {
         print $line;
@@ -174,6 +182,7 @@ if ($action eq 'show-commit-log') {
 if ($action eq 'show-commit-file') {
     die "Error: no revnum" if ! defined $revnum;
     print "show-commit-file [$revnum]\n" if $debug;
+    check_valid_rev($revnum);
     my $file = cm_commit_get_file($revnum);
     print $file;
 }

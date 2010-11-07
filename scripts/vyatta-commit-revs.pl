@@ -35,7 +35,6 @@ use lib '/opt/vyatta/share/perl5/';
 use Vyatta::Config;
 use Vyatta::ConfigMgmt;
 use File::Compare;
-use File::Copy;
 
 #
 # main
@@ -56,7 +55,7 @@ system("$cmd > $tmp_config_file");
 if (compare($tmp_config_file, $last_commit_file) == 0) {
     exit 0;
 }
-move($tmp_config_file, "$archive_dir/config.boot");
+system("sudo mv $tmp_config_file $archive_dir/config.boot");
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
 my ($user) = getpwuid($<);
 cm_commit_add_log($user, 'cli', $ARGV[0]);
