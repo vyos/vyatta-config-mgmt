@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.6) unstable; urgency=low
+
+  * Fix permissions problems when user isn't vyatta.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Sun, 07 Nov 2010 09:59:03 -0800
+
 vyatta-config-mgmt (0.5) unstable; urgency=low
 
   * Don't save a rev if the file hasn't changed.
