@@ -35,11 +35,11 @@ use lib '/opt/vyatta/share/perl5/';
 use Vyatta::Config;
 use Vyatta::ConfigMgmt;
 use POSIX;
-use File::Basename;
 use File::Compare;
 use File::Copy;
 use URI;
 use WWW::Curl::Easy;
+use Sys::Hostname;
 
 
 my $debug = 0;
@@ -54,7 +54,7 @@ if (scalar(@uris) < 1) {
 }
 
 my $last_push_file = cm_get_last_push_file();
-my $tmp_push_file  = "/tmp/config.boot-push.$$";
+my $tmp_push_file  = "/tmp/config.boot.$$";
 
 my $cmd = 'cli-shell-api showCfg --show-active-only';
 system("$cmd > $tmp_push_file");
@@ -63,8 +63,10 @@ if (-e $last_push_file and compare($last_push_file, $tmp_push_file) == 0) {
     exit 0;
 }
 
-my $timestamp = strftime("_%Y%m%d_%H%M%S", localtime);
-my $save_file = basename($tmp_push_file) . $timestamp;
+my $timestamp = strftime(".%Y%m%d_%H%M%S", localtime);
+my $hostname = hostname();
+$hostname = 'vyatta' if ! defined $hostname;
+my $save_file = "config.boot-$hostname" . $timestamp;
 
 print "Archiving config...\n";
 foreach my $uri (@uris) {
