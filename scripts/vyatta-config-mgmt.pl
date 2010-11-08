@@ -55,9 +55,20 @@ sub get_link {
     return $link;
 }
 
+sub check_integer {
+    my ($num) = @_;
+
+    if ($num !~ /^\d+$/) {
+        print "Invalid number [$num]\n";
+        exit 1;
+    }
+    return 1;
+}
+
 sub check_valid_rev {
     my ($rev) = @_;
 
+    check_integer($rev);
     my $num_revs = cm_get_num_revs();
     return 1 if $rev <= $num_revs;
     print "Invalid revision [$rev]\n";
@@ -72,8 +83,8 @@ my ($action, $uri, $revs, $revnum);
 Getopt::Long::Configure('pass_through');
 GetOptions("action=s"      => \$action,
            "uri=s"         => \$uri,
-           "revs=i"        => \$revs,
-           "revnum=i"      => \$revnum,
+           "revs=s"        => \$revs,
+           "revnum=s"      => \$revnum,
 );
 
 die "Error: no action"      if ! defined $action;
@@ -131,6 +142,7 @@ if ($action eq 'valid-uri') {
 if ($action eq 'update-revs') {
     die "Error: no revs" if ! defined $revs;
     print "update-revs [$revs]\n" if $debug;
+    check_integer($revs);
     my $link = get_link($commit_revs_script);
     if ($revs == 0) {
         print "remove link [$link]\n" if $debug;
@@ -185,6 +197,7 @@ if ($action eq 'show-commit-file') {
     check_valid_rev($revnum);
     my $file = cm_commit_get_file($revnum);
     print $file;
+    exit 0;
 }
 
 if ($action eq 'diff') {
@@ -215,6 +228,7 @@ if ($action eq 'diff') {
         my $diff = `zdiff -u $filename2 $filename`;
         print $diff;
     }
+    exit 0;
 }
 
 exit $rc;
