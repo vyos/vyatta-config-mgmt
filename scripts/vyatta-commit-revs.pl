@@ -50,8 +50,8 @@ if (! -d $archive_dir) {
     system("sudo mkdir $archive_dir");
     system("sudo chown vyatta:vyattacfg $archive_dir");
 }
-my $cmd = 'cli-shell-api showCfg --show-active-only';
-system("$cmd > $tmp_config_file");
+my $cmd = '/opt/vyatta/sbin/vyatta-save-config.pl';
+system("$cmd $tmp_config_file > /dev/null");
 if (compare($tmp_config_file, $last_commit_file) == 0) {
     exit 0;
 }

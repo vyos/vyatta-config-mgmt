@@ -31,7 +31,9 @@ our @EXPORT = qw(cm_commit_add_log cm_commit_get_log cm_get_archive_dir
                  cm_get_commit_hook_dir cm_write_file cm_read_file
                  cm_commit_get_file cm_commit_get_file_name
                  cm_get_max_revs cm_get_num_revs cm_get_last_commit_file 
-                 cm_get_last_push_file);
+                 cm_get_last_push_file cm_get_boot_config_file
+                 cm_get_config_rb
+                );
 use base qw(Exporter);
 
 use Vyatta::Config;
@@ -50,7 +52,15 @@ my $lr_state_file    = "$archive_dir/lr.state";
 my $commit_log_file  = "$archive_dir/commits";
 my $last_commit_file = "$archive_dir/config.boot";
 my $last_push_file   = "$archive_dir/config.boot-push";
+my $config_file_rb   = "$archive_dir/config.boot-rollback";
 
+sub cm_get_boot_config_file {
+    return $config_file;
+}
+
+sub cm_get_config_rb {
+    return $config_file_rb;
+}
 
 sub cm_get_commit_hook_dir {
     return $commit_hook_dir;
@@ -117,9 +127,7 @@ sub cm_commit_add_log {
 
     my $time = time();
     if ($comment =~ /\|/) {
-        print "before [$comment]\n";
         $comment =~ s/\|/\%\%/g;
-        print "after [$comment]\n";
     }
     my $new_line = "|$time|$user|$via|$comment|";
     my @lines = cm_read_file($commit_log_file);
@@ -170,7 +178,7 @@ sub cm_commit_get_file {
     my ($revnum) = @_;
 
     my $max_revs = cm_get_max_revs();
-    if ($revnum > $max_revs) {
+    if (defined $max_revs and $revnum > $max_revs) {
         print "Error: Invalid config revision number\n";
         exit 1;
     }

@@ -36,7 +36,10 @@ use Vyatta::Config;
 use Vyatta::ConfigMgmt;
 use Getopt::Long;
 use File::Basename;
+use File::Copy;
 use URI;
+use IO::Prompt;
+use Sys::Syslog qw(:standard :macros);
 
 my $commit_uri_script  = '/opt/vyatta/sbin/vyatta-commit-push.pl';
 my $commit_revs_script = '/opt/vyatta/sbin/vyatta-commit-revs.pl';
@@ -45,6 +48,7 @@ my $commit_hook_dir = cm_get_commit_hook_dir();
 my $archive_dir     = cm_get_archive_dir();
 my $config_file     = "$archive_dir/config.boot";
 my $lr_conf_file    = cm_get_lr_conf_file();
+my $confirm_job_file = '/var/run/confirm.job';
 
 my $debug = 0;
 
@@ -75,16 +79,31 @@ sub check_valid_rev {
     exit 1;
 }
 
+sub parse_at_output {
+    my @lines = @_;
+    foreach my $line (@lines) {
+        if ($line =~ /error/) {
+            return (1, '', '');
+        } elsif ($line =~ /job (\d+) (.*)$/) {
+            return (0, $1, $2);
+        } 
+    }
+    return (1, '', '');
+}
+
+
 #
 # main
 #
-my ($action, $uri, $revs, $revnum);
+my ($action, $uri, $revs, $revnum, $minutes, $filename);
 
 Getopt::Long::Configure('pass_through');
 GetOptions("action=s"      => \$action,
            "uri=s"         => \$uri,
            "revs=s"        => \$revs,
            "revnum=s"      => \$revnum,
+           "minutes=s"     => \$minutes,
+           "file=s"        => \$filename,
 );
 
 die "Error: no action"      if ! defined $action;
@@ -170,7 +189,8 @@ if ($action eq 'update-revs') {
             system("sudo touch $archive_dir/commits");
             system("sudo chgrp vyattacfg $archive_dir/commits");
             system("sudo chmod 664 $archive_dir/commits");
-            system("$commit_revs_script baseline config.boot");
+            my $cmd = "$commit_revs_script baseline config.boot";
+            system("sudo sg vyattacfg \"$cmd\"");
         }
         print "done\n";
         exit 0;
@@ -229,6 +249,103 @@ if ($action eq 'diff') {
         print $diff;
     }
     exit 0;
+}
+
+if ($action eq 'commit-confirm') {
+    die "Error: no minutes" if ! defined $minutes;
+    print "commit-confirm [$minutes]\n" if $debug;
+    my $max_revs = cm_get_max_revs();
+    if (!defined $max_revs or $max_revs <= 0) {
+        print "commit-revisions is not configured.\n\n";
+        exit 1;
+    }
+    check_integer($minutes);
+    my $rollback_config = cm_commit_get_file(0);
+
+    # check if another commit-confirm pending
+
+    print "commit confirm will be automatically rebooted in $minutes minutes unless confirmed\n";
+    if (prompt("Proceed? [confirm]", -y1d=>"y")) {
+    } else {
+        print "commit confirm canceled\n";
+        exit 1;
+    }
+
+    my $config_rb = cm_get_config_rb();
+    cm_write_file($config_rb, $rollback_config);
+    
+    $cmd = "/opt/vyatta/sbin/vyatta-config-mgmt.pl --action rollback" 
+         . " --file $config_rb";
+    my @lines = `echo sudo sg vyattacfg \\"$cmd\\" | at now + $minutes minutes 2>&1`;
+    my ($err, $job, $time) = parse_at_output(@lines);
+    if ($err) {
+        print "Error: unable to schedule reboot\n";
+        exit 1;
+    }
+    system("echo $job > $confirm_job_file");
+
+    exit 0;
+}
+
+if ($action eq 'confirm') {
+    if (! -e $confirm_job_file) {
+        print "No confirm pending\n";
+        exit 0;
+    }
+    my $job = `cat $confirm_job_file`;
+    chomp $job;
+    system("sudo atrm $job");
+    system("sudo rm -f $confirm_job_file");
+    # log confirm
+    exit 0;
+}
+
+if ($action eq 'rollback') {
+    my ($method, $rollback_config) = (undef, undef);
+
+    if (defined $revnum) {
+        print "rollback [$revnum]\n" if $debug;
+        check_valid_rev($revnum);        
+        $method = 'revnum';
+        if (prompt("Proceed with reboot? [confirm]", -y1d=>"y")) {
+        } else {
+            print "Cancelling rollback\n";
+            exit 0;
+        }
+        $rollback_config = cm_commit_get_file($revnum);
+    }
+
+    if (defined $filename) {
+        print "rollback [$filename]\n" if $debug;
+        if (! -e $filename) {
+            die "Error: file [$filename] doesn't exist";
+        }
+        if (defined $method) {
+            die "Error: can only define revnum or file";
+        }
+        $method = 'file';
+        # Should have code to validate config, but for now only
+        # called internally.  If we later expose this to cli
+        # we'll need to prompt for confirmation.
+        $rollback_config = cm_read_file($filename);
+    }
+    if (!defined $method) {
+        die "Error: must define either revnum or file";
+    }
+
+    my ($user) = getpwuid($<);
+    cm_commit_add_log($user, 'rollback', '');
+    my $boot_config_file = cm_get_boot_config_file();
+    my $archive_dir      = cm_get_archive_dir();
+    my $last_commit_file = cm_get_last_commit_file();
+    system("sudo mv $boot_config_file $archive_dir/config.boot-prerollback");
+    cm_write_file($boot_config_file, $rollback_config);
+    cm_write_file($last_commit_file, $rollback_config); # white lie
+    openlog($0, "", LOG_USER);
+    my $login = getpwuid($<) || "unknown";
+    syslog("warning", "Rollback reboot requested by $login");
+    closelog();
+    exec("sudo /sbin/reboot");
 }
 
 exit $rc;
