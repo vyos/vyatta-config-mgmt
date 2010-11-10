@@ -327,7 +327,8 @@ if ($action eq 'rollback') {
         # Should have code to validate config, but for now only
         # called internally.  If we later expose this to cli
         # we'll need to prompt for confirmation.
-        $rollback_config = cm_read_file($filename);
+        my @lines = cm_read_file($filename);
+        $rollback_config = join("\n", @lines);
     }
     if (!defined $method) {
         die "Error: must define either revnum or file";
