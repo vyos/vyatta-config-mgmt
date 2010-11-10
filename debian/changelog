@@ -1,3 +1,11 @@
+vyatta-config-mgmt (0.8) unstable; urgency=low
+
+  * Add check for valid integer.
+  * Add first pass commit-confirm and rollback (requires reboot for
+    now).
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 09 Nov 2010 17:06:16 -0800
+
 vyatta-config-mgmt (0.7) unstable; urgency=low
 
   * Append hostname on config.boot file for commit-uri.
