@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.9) unstable; urgency=low
+
+  * Fix writing of config file on file rollback.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 09 Nov 2010 18:16:31 -0800
+
 vyatta-config-mgmt (0.8) unstable; urgency=low
 
   * Add check for valid integer.
