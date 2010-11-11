@@ -35,10 +35,16 @@ use lib '/opt/vyatta/share/perl5/';
 use Vyatta::Config;
 use Vyatta::ConfigMgmt;
 use File::Compare;
+use Getopt::Long;
 
 #
 # main
 #
+
+my $rollback;
+Getopt::Long::Configure('pass_through');
+GetOptions("rollback=s" => \$rollback,
+          );
 
 my $archive_dir      = cm_get_archive_dir();
 my $lr_state_file    = cm_get_lr_state_file();
@@ -50,12 +56,18 @@ if (! -d $archive_dir) {
     system("sudo mkdir $archive_dir");
     system("sudo chown vyatta:vyattacfg $archive_dir");
 }
-my $cmd = '/opt/vyatta/sbin/vyatta-save-config.pl';
-system("$cmd $tmp_config_file > /dev/null");
-if (compare($tmp_config_file, $last_commit_file) == 0) {
-    exit 0;
+if (! defined $rollback) {
+    my $cmd = '/opt/vyatta/sbin/vyatta-save-config.pl';
+    system("$cmd $tmp_config_file > /dev/null");
+    if (compare($tmp_config_file, $last_commit_file) == 0) {
+        exit 0;
+    }
+    system("sudo mv $tmp_config_file $archive_dir/config.boot");
+} else {
+    my $boot_config_file = cm_get_boot_config_file();
+    system("sudo cp $boot_config_file $archive_dir/config.boot");
 }
-system("sudo mv $tmp_config_file $archive_dir/config.boot");
+
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
 my ($user) = getpwuid($<);
 cm_commit_add_log($user, 'cli', $ARGV[0]);

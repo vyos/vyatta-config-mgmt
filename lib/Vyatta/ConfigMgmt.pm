@@ -32,7 +32,7 @@ our @EXPORT = qw(cm_commit_add_log cm_commit_get_log cm_get_archive_dir
                  cm_commit_get_file cm_commit_get_file_name
                  cm_get_max_revs cm_get_num_revs cm_get_last_commit_file 
                  cm_get_last_push_file cm_get_boot_config_file
-                 cm_get_config_rb
+                 cm_get_config_rb cm_get_config_dir
                 );
 use base qw(Exporter);
 
@@ -68,6 +68,10 @@ sub cm_get_commit_hook_dir {
 
 sub cm_get_archive_dir {
     return $archive_dir;
+}
+
+sub cm_get_config_dir {
+    return $config_dir;
 }
 
 sub cm_get_lr_conf_file {

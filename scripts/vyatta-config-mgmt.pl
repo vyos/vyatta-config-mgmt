@@ -328,20 +328,22 @@ if ($action eq 'rollback') {
         # called internally.  If we later expose this to cli
         # we'll need to prompt for confirmation.
         my @lines = cm_read_file($filename);
-        $rollback_config = join("\n", @lines);
+        $rollback_config  = join("\n", @lines);
+        $rollback_config .= "\n";
     }
     if (!defined $method) {
         die "Error: must define either revnum or file";
     }
 
     my ($user) = getpwuid($<);
-    cm_commit_add_log($user, 'rollback', '');
     my $boot_config_file = cm_get_boot_config_file();
     my $archive_dir      = cm_get_archive_dir();
     my $last_commit_file = cm_get_last_commit_file();
-    system("sudo mv $boot_config_file $archive_dir/config.boot-prerollback");
+    system("sudo cp $boot_config_file $archive_dir/config.boot-prerollback");
     cm_write_file($boot_config_file, $rollback_config);
     cm_write_file($last_commit_file, $rollback_config); # white lie
+    my $cmd = "$commit_revs_script --rollback=1 rollback/reboot";
+    system("sudo sg vyattacfg \"$cmd\"");
     openlog($0, "", LOG_USER);
     my $login = getpwuid($<) || "unknown";
     syslog("warning", "Rollback reboot requested by $login");
