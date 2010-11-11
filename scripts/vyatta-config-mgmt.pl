@@ -211,6 +211,17 @@ if ($action eq 'show-commit-log') {
     exit 0;
 }
 
+if ($action eq 'show-commit-log-brief') {
+    print "show-commit-log-brief\n" if $debug;
+    my $max_revs = cm_get_max_revs();
+    my @log = cm_commit_get_log(1);
+    foreach my $line (@log) {
+        $line =~ s/\s/_/g;
+        print $line, ' ';
+    }
+    exit 0;
+}
+
 if ($action eq 'show-commit-file') {
     die "Error: no revnum" if ! defined $revnum;
     print "show-commit-file [$revnum]\n" if $debug;

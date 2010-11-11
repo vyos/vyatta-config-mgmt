@@ -146,6 +146,7 @@ sub cm_commit_add_log {
 }
 
 sub cm_commit_get_log {
+    my ($brief) = @_;
     
     my @lines = cm_read_file($commit_log_file);
     
@@ -158,13 +159,20 @@ sub cm_commit_get_log {
         }
         $line = $1;
         my ($time, $user, $via, $comment) = split(/\|/, $line);
-        my $time_str = strftime("%Y-%m-%d %H:%M:%S", localtime($time));
         $comment =~ s/\%\%/\|/g;
-        my $new_line = sprintf("%-2s  %s by %s via %s\n", 
-                               $count, $time_str, $user, $via);
-        push @commit_log, $new_line;
-        if (defined $comment and $comment ne '' and $comment ne 'commit') {
-            push @commit_log, "    $comment\n" 
+        if (defined $brief) {
+            my $time_str = strftime("%Y-%m-%d_%H:%M:%S", localtime($time));
+            $comment = '' if ! defined $comment;
+            my $new_line = sprintf("%s %s by %s", $time_str, $user, $via);
+            push @commit_log, $new_line;
+        } else {
+            my $time_str = strftime("%Y-%m-%d %H:%M:%S", localtime($time));
+            my $new_line = sprintf("%-2s  %s by %s via %s\n", 
+                                   $count, $time_str, $user, $via);
+            push @commit_log, $new_line;
+            if (defined $comment and $comment ne '' and $comment ne 'commit') {
+                push @commit_log, "    $comment\n" 
+            }
         }
         $count++;
     }
