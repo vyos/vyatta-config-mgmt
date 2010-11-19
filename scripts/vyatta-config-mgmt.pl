@@ -192,7 +192,6 @@ if ($action eq 'update-revs') {
             my $cmd = "$commit_revs_script baseline config.boot";
             system("sudo sg vyattacfg \"$cmd\"");
         }
-        print "done\n";
         exit 0;
     }
     exit 0;
@@ -235,20 +234,31 @@ if ($action eq 'diff') {
     print "diff\n" if $debug;    
     my $args = $#ARGV;
     if ($args < 0) {
-        my $tmp_config_file = "/tmp/config.boot.$$";
+        my $tmp_config_file  = "/tmp/config.boot.$$";
         my $tmp_config_file2 = "/tmp/config.boot2.$$";
-        system("cli-shell-api showCfg --show-active-only> $tmp_config_file");
-        system("cli-shell-api showCfg > $tmp_config_file2");
-        my $diff = `diff -u -w $tmp_config_file2 $tmp_config_file`;
-        print $diff;
+        system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
+        system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
+        my $diff = `diff -u -w $tmp_config_file $tmp_config_file2`;
+        if (defined $diff and length($diff) > 0) {
+            print $diff;
+        } else {
+            print "No changes between working and active configurations\n";
+        }
         system("rm $tmp_config_file $tmp_config_file2");
     } elsif ($args eq 0) {
         my $rev1 = $ARGV[0];
         check_valid_rev($rev1);
-        my $filename  = cm_commit_get_file_name(0);
-        my $filename2 = cm_commit_get_file_name($rev1);
-        my $diff = `zdiff -u $filename2 $filename`;
-        print $diff;
+        my $tmp_config_file = "/tmp/config.boot.$$";
+        system("cli-shell-api showCfg --show-working-only > $tmp_config_file");
+        my $filename1 = cm_commit_get_file_name($rev1);
+        my $diff = `zdiff -u $filename1 $tmp_config_file`;
+        if (defined $diff and length($diff) > 0) {
+            print $diff;
+        } else {
+            print "No changes between working and "
+                . "revision $rev1 configurations\n";
+        }
+        system("rm $tmp_config_file");
     } elsif ($args eq 1) {
         my $rev1 = $ARGV[0];
         my $rev2 = $ARGV[1];
