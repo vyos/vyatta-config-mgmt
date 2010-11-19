@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.12) unstable; urgency=low
+
+  * Change "compare" command to use cfgShow --show-working-only.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Thu, 18 Nov 2010 18:12:26 -0800
+
 vyatta-config-mgmt (0.11) unstable; urgency=low
 
   * Add "show-commit-log-brief" for tab completion.
