@@ -38,7 +38,6 @@ use POSIX;
 use File::Compare;
 use File::Copy;
 use URI;
-use WWW::Curl::Easy;
 use Sys::Hostname;
 
 
@@ -83,18 +82,13 @@ foreach my $uri (@uris) {
     $remote .= "$scheme://$host";
     $remote .= "$path" if defined $path;
     print "  $remote ";
-    open(my $FILE, '<', $tmp_push_file) or die "Error: read $!";
-    my $curl = new WWW::Curl::Easy;
-    $curl->setopt(CURLOPT_NOPROGRESS, 1);
-    $curl->setopt(CURLOPT_URL, "$uri/$save_file");
-    $curl->setopt(CURLOPT_UPLOAD, 1);
-    $curl->setopt(CURLOPT_INFILE, $FILE);
-    $curl->setopt(CURLOPT_VERBOSE, $debug);
-    my $retcode = $curl->perform;
-    if ($retcode == 0) {
-        print "Ok\n";
+    my $cmd = "curl -s -T $tmp_push_file $uri/$save_file";
+    print "cmd [$cmd]\n" if $debug;
+    my $rc = system($cmd);
+    if ($rc eq 0) {
+        print " OK\n";
     } else {
-        print "Failed: " . $curl->strerror($retcode) . "\n";
+        print " failed\n";
     }
 }
 move($tmp_push_file, $last_push_file);
