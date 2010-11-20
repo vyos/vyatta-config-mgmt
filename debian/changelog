@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.15) unstable; urgency=low
+
+  * Filter suprious temp file lines from diff output.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Sat, 20 Nov 2010 11:30:15 -0800
+
 vyatta-config-mgmt (0.14) unstable; urgency=low
 
   * Filter version string off diff when comparing active/working to a
