@@ -234,16 +234,17 @@ if ($action eq 'diff') {
     print "diff\n" if $debug;    
     my $args = $#ARGV;
     if ($args < 0) {
+        my $rc = system("cli-shell-api sessionChanged");
+        if (defined $rc and $rc > 0) {
+            print "No changes between working and active configurations\n";
+            exit 0;
+        }
         my $tmp_config_file  = "/tmp/config.boot.$$";
         my $tmp_config_file2 = "/tmp/config.boot2.$$";
         system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
         system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
         my $diff = `diff -u -w $tmp_config_file $tmp_config_file2`;
-        if (defined $diff and length($diff) > 0) {
-            print $diff;
-        } else {
-            print "No changes between working and active configurations\n";
-        }
+        print $diff;
         system("rm $tmp_config_file $tmp_config_file2");
     } elsif ($args eq 0) {
         my $rev1 = $ARGV[0];
