@@ -91,6 +91,23 @@ sub parse_at_output {
     return (1, '', '');
 }
 
+sub filter_version_string {
+    my ($diff) = @_;
+
+    my @lines = split("\n", $diff);
+
+    my @new_lines = ();
+    my $found = 0;
+    while (my $line = pop(@lines)) {
+        if (! $found) {
+            $found = 1 if $line =~ /^@@/;
+        } else {
+            unshift(@new_lines, $line);
+        }
+    }
+    return join("\n", @new_lines);
+}
+
 
 #
 # main
@@ -254,6 +271,7 @@ if ($action eq 'diff') {
         my $filename1 = cm_commit_get_file_name($rev1);
         my $diff = `zdiff -u $filename1 $tmp_config_file`;
         if (defined $diff and length($diff) > 0) {
+            $diff = filter_version_string($diff);
             print $diff;
         } else {
             print "No changes between working and "
