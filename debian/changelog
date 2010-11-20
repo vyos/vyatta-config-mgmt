@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.17) unstable; urgency=low
+
+  * Add number to /etc/commit scripts to set execution ordering.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Sat, 20 Nov 2010 14:39:35 -0800
+
 vyatta-config-mgmt (0.16) unstable; urgency=low
 
   * Revert usage of libwww-curl-perl since it doesn't support scp.
