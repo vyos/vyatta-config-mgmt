@@ -1,0 +1,15 @@
+help: config file changes at a given revision
+run: if [ "$VYATTA_USER_LEVEL_DIR" == "/opt/vyatta/etc/shell/level/admin" ]; 
+     then
+        if [[ $5 = *[[:digit:]]* ]]; 
+        then
+           next=$(($5+1))
+        else 
+           echo Invalid number $5
+           exit 1;
+        fi
+        ${vyatta_sbindir}/vyatta-config-mgmt.pl  \
+           --action=diff "$5" "$next"
+     else
+        echo Must be an admin user to run this command.
+     fi
