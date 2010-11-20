@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.14) unstable; urgency=low
+
+  * Filter version string off diff when comparing active/working to a
+    file.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Fri, 19 Nov 2010 20:18:24 -0800
+
 vyatta-config-mgmt (0.13) unstable; urgency=low
 
   * Check sessionChanged before creating active/working config files.
