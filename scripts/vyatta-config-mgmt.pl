@@ -91,21 +91,32 @@ sub parse_at_output {
     return (1, '', '');
 }
 
-sub filter_version_string {
+sub filter_file_lines {
     my ($diff) = @_;
 
     my @lines = split("\n", $diff);
+    my $line1 = shift @lines;
+    my $line2 = shift @lines;
+    unshift(@lines, $line2) if $line2 !~ /^\+\+\+ /;
+    unshift(@lines, $line1) if $line1 !~ /^\-\-\- /;
+    return join("\n", @lines);
+}
 
-    my @new_lines = ();
+sub filter_version_string {
+    my ($diff) = @_;
+
+    # find last diff hunk, skip it if it's the version string
+    my @lines = split("\n", $diff);
+    my @last_hunk = ();
     my $found = 0;
     while (my $line = pop(@lines)) {
-        if (! $found) {
-            $found = 1 if $line =~ /^@@/;
-        } else {
-            unshift(@new_lines, $line);
-        }
+        unshift(@last_hunk, $line);
+        $found = 1 if $line =~ /vyatta-config-version/;
+        last if $line =~ /^@@/;
     }
-    return join("\n", @new_lines);
+    return join("\n", @lines) if $found;
+    push(@lines, @last_hunk);
+    return join("\n", @lines);
 }
 
 
@@ -261,6 +272,7 @@ if ($action eq 'diff') {
         system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
         system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
         my $diff = `diff -u -w $tmp_config_file $tmp_config_file2`;
+        $diff = filter_file_lines($diff);
         print $diff;
         system("rm $tmp_config_file $tmp_config_file2");
     } elsif ($args eq 0) {
@@ -270,8 +282,9 @@ if ($action eq 'diff') {
         system("cli-shell-api showCfg --show-working-only > $tmp_config_file");
         my $filename1 = cm_commit_get_file_name($rev1);
         my $diff = `zdiff -u $filename1 $tmp_config_file`;
+        $diff = filter_file_lines($diff);
+        $diff = filter_version_string($diff);
         if (defined $diff and length($diff) > 0) {
-            $diff = filter_version_string($diff);
             print $diff;
         } else {
             print "No changes between working and "
@@ -286,6 +299,7 @@ if ($action eq 'diff') {
         my $filename  = cm_commit_get_file_name($rev1);
         my $filename2 = cm_commit_get_file_name($rev2);
         my $diff = `zdiff -u $filename2 $filename`;
+        $diff = filter_file_lines($diff);
         print $diff;
     }
     exit 0;
