@@ -55,7 +55,13 @@ my $debug = 0;
 sub get_link {
     my ($path) = @_;
 
-    my $link = $commit_hook_dir . basename($path);
+    my $script = basename($path);
+    if ($script =~ /revs/) {
+        $script = "01" . $script;
+    } elsif ($script =~ /push/) {
+        $script = "02" . $script;
+    }
+    my $link = $commit_hook_dir . $script; 
     return $link;
 }
 
