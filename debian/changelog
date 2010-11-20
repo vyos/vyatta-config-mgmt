@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.13) unstable; urgency=low
+
+  * Check sessionChanged before creating active/working config files.
+  * Add "show system commit diff N" op mode command.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Fri, 19 Nov 2010 18:09:02 -0800
+
 vyatta-config-mgmt (0.12) unstable; urgency=low
 
   * Change "compare" command to use cfgShow --show-working-only.
