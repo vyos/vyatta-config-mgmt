@@ -44,10 +44,10 @@ use Sys::Syslog qw(:standard :macros);
 my $commit_uri_script  = '/opt/vyatta/sbin/vyatta-commit-push.pl';
 my $commit_revs_script = '/opt/vyatta/sbin/vyatta-commit-revs.pl';
 
-my $commit_hook_dir = cm_get_commit_hook_dir();
-my $archive_dir     = cm_get_archive_dir();
-my $config_file     = "$archive_dir/config.boot";
-my $lr_conf_file    = cm_get_lr_conf_file();
+my $commit_hook_dir  = cm_get_commit_hook_dir();
+my $archive_dir      = cm_get_archive_dir();
+my $config_file      = "$archive_dir/config.boot";
+my $lr_conf_file     = cm_get_lr_conf_file();
 my $confirm_job_file = '/var/run/confirm.job';
 
 my $debug = 0;
@@ -314,36 +314,39 @@ if ($action eq 'diff') {
 if ($action eq 'commit-confirm') {
     die "Error: no minutes" if ! defined $minutes;
     print "commit-confirm [$minutes]\n" if $debug;
+    if (-e $confirm_job_file) {
+        print "Another confirm is pending\n";
+        exit 0;
+    }
     my $max_revs = cm_get_max_revs();
     if (!defined $max_revs or $max_revs <= 0) {
         print "commit-revisions is not configured.\n\n";
         exit 1;
     }
     check_integer($minutes);
-    my $rollback_config = cm_commit_get_file(0);
-
-    # check if another commit-confirm pending
-
-    print "commit confirm will be automatically rebooted in $minutes minutes unless confirmed\n";
+    print "commit confirm will be automatically reboot in $minutes"
+        . " minutes unless confirmed\n";
     if (prompt("Proceed? [confirm]", -y1d=>"y")) {
     } else {
-        print "commit confirm canceled\n";
+        print "commit-confirm canceled\n";
         exit 1;
     }
 
+    my @lines= cm_read_file(cm_get_boot_config_file());
+    my $rollback_config  = join("\n", @lines);
+    $rollback_config .= "\n";
     my $config_rb = cm_get_config_rb();
     cm_write_file($config_rb, $rollback_config);
     
     $cmd = "/opt/vyatta/sbin/vyatta-config-mgmt.pl --action rollback" 
          . " --file $config_rb";
-    my @lines = `echo sudo sg vyattacfg \\"$cmd\\" | at now + $minutes minutes 2>&1`;
+    @lines = `echo sudo sg vyattacfg \\"$cmd\\" | at now + $minutes minutes 2>&1`;
     my ($err, $job, $time) = parse_at_output(@lines);
     if ($err) {
         print "Error: unable to schedule reboot\n";
         exit 1;
     }
     system("echo $job > $confirm_job_file");
-
     exit 0;
 }
 
