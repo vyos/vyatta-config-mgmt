@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.18) unstable; urgency=low
+
+  * Change commit-confirm to rollback to last saved config rather than
+    active.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Mon, 22 Nov 2010 19:41:14 -0800
+
 vyatta-config-mgmt (0.17) unstable; urgency=low
 
   * Add number to /etc/commit scripts to set execution ordering.
