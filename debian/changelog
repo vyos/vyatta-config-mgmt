@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.19) unstable; urgency=low
+
+  * Change commit revisions script to use COMMIT_VIA env var.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Tue, 23 Nov 2010 15:41:41 -0800
+
 vyatta-config-mgmt (0.18) unstable; urgency=low
 
   * Change commit-confirm to rollback to last saved config rather than
