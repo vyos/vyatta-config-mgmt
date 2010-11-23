@@ -52,6 +52,11 @@ my $lr_conf_file     = cm_get_lr_conf_file();
 my $last_commit_file = cm_get_last_commit_file();
 my $tmp_config_file  = "/tmp/config.boot.$$";
 
+my $commit_status = $ENV{'COMMIT_STATUS'};
+my $commit_via    = $ENV{'COMMIT_VIA'};
+$commit_status = 'unknown' if !defined $commit_via;
+$commit_via    = 'other'   if !defined $commit_via;
+
 if (! -d $archive_dir) {
     system("sudo mkdir $archive_dir");
     system("sudo chown vyatta:vyattacfg $archive_dir");
@@ -69,8 +74,8 @@ if (! defined $rollback) {
 }
 
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
-my ($user) = getpwuid($<);
-cm_commit_add_log($user, 'cli', $ARGV[0]);
+my $user = getlogin() || getpwuid($<) || "unknown";
+cm_commit_add_log($user, $commit_via, $ARGV[0]);
 
 exit 0;
 
