@@ -277,9 +277,9 @@ if ($action eq 'diff') {
         my $tmp_config_file2 = "/tmp/config.boot2.$$";
         system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
         system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
-        my $diff = `diff -u -w $tmp_config_file $tmp_config_file2`;
+        my $diff = `diff -u $tmp_config_file $tmp_config_file2`;
         $diff = filter_file_lines($diff);
-        print $diff;
+        print "$diff\n";
         system("rm $tmp_config_file $tmp_config_file2");
     } elsif ($args eq 0) {
         my $rev1 = $ARGV[0];
@@ -291,7 +291,7 @@ if ($action eq 'diff') {
         $diff = filter_file_lines($diff);
         $diff = filter_version_string($diff);
         if (defined $diff and length($diff) > 0) {
-            print $diff;
+            print "$diff\n";
         } else {
             print "No changes between working and "
                 . "revision $rev1 configurations\n";
@@ -306,7 +306,7 @@ if ($action eq 'diff') {
         my $filename2 = cm_commit_get_file_name($rev2);
         my $diff = `zdiff -u $filename2 $filename`;
         $diff = filter_file_lines($diff);
-        print $diff;
+        print "$diff\n";
     }
     exit 0;
 }
