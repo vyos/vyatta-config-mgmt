@@ -278,9 +278,14 @@ if ($action eq 'diff') {
         system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
         system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
         my $diff = `diff -u $tmp_config_file $tmp_config_file2`;
-        $diff = filter_file_lines($diff);
-        print "$diff\n";
-        system("rm $tmp_config_file $tmp_config_file2");
+        if (defined $diff and length($diff) > 0) {
+            $diff = filter_file_lines($diff);
+            print "$diff\n";
+            system("rm $tmp_config_file $tmp_config_file2");
+        } else {
+            print "No changes between working and active configurations\n";
+            exit 0;
+        }
     } elsif ($args eq 0) {
         my $rev1 = $ARGV[0];
         check_valid_rev($rev1);
