@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.24) unstable; urgency=low
+
+  * Set COMMIT_VIA for initial commit-revisions setup.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Sat, 04 Dec 2010 13:40:52 -0800
+
 vyatta-config-mgmt (0.23) unstable; urgency=low
 
   * Add cfg-version for config-management.
