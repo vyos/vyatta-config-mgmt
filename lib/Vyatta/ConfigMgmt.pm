@@ -113,7 +113,7 @@ sub cm_write_file {
 
 sub cm_get_max_revs {
     my $config = new Vyatta::Config;
-    $config->setLevel('system config-mgmt');
+    $config->setLevel('system config-management');
     my $revs = $config->returnOrigValue('commit-revisions');
     return $revs;
 }
