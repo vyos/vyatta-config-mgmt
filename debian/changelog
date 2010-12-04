@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.22) unstable; urgency=low
+
+  * Change 'config-mgmt' to 'config-management' to appease support.
+  * Return -1 if commit log is missing.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Fri, 03 Dec 2010 16:53:14 -0800
+
 vyatta-config-mgmt (0.21) unstable; urgency=low
 
   * Fix 6511: compare perl errors after failed commit.
