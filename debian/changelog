@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.23) unstable; urgency=low
+
+  * Add cfg-version for config-management.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Fri, 03 Dec 2010 17:52:37 -0800
+
 vyatta-config-mgmt (0.22) unstable; urgency=low
 
   * Change 'config-mgmt' to 'config-management' to appease support.
