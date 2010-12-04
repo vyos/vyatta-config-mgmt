@@ -119,7 +119,7 @@ sub cm_get_max_revs {
 }
 
 sub cm_get_num_revs {
-    
+    return -1 if ! -e $commit_log_file;
     my @lines = cm_read_file($commit_log_file);
     my $num_revs = scalar(@lines);
     $num_revs-- if $num_revs > 0;  # rev files start at 0
