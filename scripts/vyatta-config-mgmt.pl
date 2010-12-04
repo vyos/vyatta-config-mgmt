@@ -218,13 +218,13 @@ if ($action eq 'update-revs') {
         $lr_conf   .= "}\n";
         cm_write_file($lr_conf_file, $lr_conf);
         my $num_revs = cm_get_num_revs();
-        if ($num_revs == 0) {
+        if (! -e "$archive_dir/commits" or $num_revs == 0) {
             # store a baseline config
             system("sudo touch $archive_dir/commits");
             system("sudo chgrp vyattacfg $archive_dir/commits");
             system("sudo chmod 664 $archive_dir/commits");
             my $cmd = "$commit_revs_script baseline config.boot";
-            system("sudo sg vyattacfg \"$cmd\"");
+            system("sudo sg vyattacfg \"export COMMIT_VIA=init; $cmd\"");
         }
         exit 0;
     }
