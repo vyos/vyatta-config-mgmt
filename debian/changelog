@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.25) unstable; urgency=low
+
+  * Rename 'remote-archive commit-uri' to 'commit-archive location' per
+    design spec review comments.
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Wed, 22 Dec 2010 11:52:49 -0800
+
 vyatta-config-mgmt (0.24) unstable; urgency=low
 
   * Set COMMIT_VIA for initial commit-revisions setup.
