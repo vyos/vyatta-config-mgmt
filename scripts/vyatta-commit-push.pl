@@ -44,8 +44,8 @@ use Sys::Hostname;
 my $debug = 0;
 
 my $config = new Vyatta::Config;
-$config->setLevel('system config-management remote-archive');
-my @uris = $config->returnOrigValues('commit-uri');
+$config->setLevel('system config-management commit-archive');
+my @uris = $config->returnOrigValues('location');
 
 if (scalar(@uris) < 1) {
     print "No URI's configured\n";
