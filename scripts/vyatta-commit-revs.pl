@@ -74,7 +74,7 @@ if (! defined $rollback) {
 }
 
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
-my $user = getlogin() || getpwuid($<) || "unknown";
+my $user = getlogin() || getpwuid($>) || "unknown";
 cm_commit_add_log($user, $commit_via, $ARGV[0]);
 
 exit 0;
