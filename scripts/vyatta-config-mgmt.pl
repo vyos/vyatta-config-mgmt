@@ -310,8 +310,13 @@ if ($action eq 'diff') {
         my $filename  = cm_commit_get_file_name($rev1);
         my $filename2 = cm_commit_get_file_name($rev2);
         my $diff = `zdiff -u $filename2 $filename`;
-        $diff = filter_file_lines($diff);
-        print "$diff\n";
+        if (defined $diff and length($diff) > 0) {
+            $diff = filter_file_lines($diff);
+            print "$diff\n";
+        } else {
+            print "No changes between revision $rev1 and "
+                . "revision $rev2 configurations\n";
+        }
     }
     exit 0;
 }
