@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.25+mendocino3) unstable; urgency=low
+
+  * Fix 6674: Internal errors for "compare <> <>".
+
+ -- Stig Thormodsrud <stig@vyatta.com>  Wed, 12 Jan 2011 12:17:37 -0800
+
 vyatta-config-mgmt (0.25+mendocino2) unstable; urgency=low
 
   * Change to use euid to get login name.
