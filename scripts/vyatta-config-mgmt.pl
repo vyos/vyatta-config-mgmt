@@ -274,14 +274,11 @@ if ($action eq 'diff') {
             exit 0;
         }
         my $tmp_config_file  = "/tmp/config.boot.$$";
-        my $tmp_config_file2 = "/tmp/config.boot2.$$";
         system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
-        system("cli-shell-api showCfg --show-working-only > $tmp_config_file2");
-        my $diff = `diff -u $tmp_config_file $tmp_config_file2`;
+        my $diff = `cli-shell-api showConfig --show-cfg1 $tmp_config_file --show-cfg2 \@WORKING --show-show-defaults --show-context-diff`;
         if (defined $diff and length($diff) > 0) {
-            $diff = filter_file_lines($diff);
-            print "$diff\n";
-            system("rm $tmp_config_file $tmp_config_file2");
+            print "$diff";
+            system("rm $tmp_config_file");
         } else {
             print "No changes between working and active configurations\n";
             exit 0;
@@ -289,19 +286,18 @@ if ($action eq 'diff') {
     } elsif ($args eq 0) {
         my $rev1 = $ARGV[0];
         check_valid_rev($rev1);
-        my $tmp_config_file = "/tmp/config.boot.$$";
-        system("cli-shell-api showCfg --show-working-only > $tmp_config_file");
         my $filename1 = cm_commit_get_file_name($rev1);
-        my $diff = `zdiff -u $filename1 $tmp_config_file`;
-        $diff = filter_file_lines($diff);
-        $diff = filter_version_string($diff);
+        my $outfile = $filename1;
+        $outfile =~ s/(.*)\.gz/$1/g;
+        system("zcat $filename1 > $outfile");
+        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile --show-cfg2 \@WORKING --show-show-defaults --show-context-diff`;
         if (defined $diff and length($diff) > 0) {
-            print "$diff\n";
+            print "$diff";
         } else {
             print "No changes between working and "
                 . "revision $rev1 configurations\n";
         }
-        system("rm $tmp_config_file");
+        system("rm $outfile");
     } elsif ($args eq 1) {
         my $rev1 = $ARGV[0];
         my $rev2 = $ARGV[1];
@@ -309,14 +305,52 @@ if ($action eq 'diff') {
         check_valid_rev($rev2);
         my $filename  = cm_commit_get_file_name($rev1);
         my $filename2 = cm_commit_get_file_name($rev2);
-        my $diff = `zdiff -u $filename2 $filename`;
+        my $outfile = $filename;
+        $outfile =~ s/(.*)\.gz/$1/g;
+        system("zcat $filename > $outfile");
+        my $outfile2 = $filename2;
+        $outfile2 =~ s/(.*)\.gz/$1/g;
+        system("zcat $filename2 > $outfile2");
+        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile --show-show-defaults --show-context-diff`;
         if (defined $diff and length($diff) > 0) {
-            $diff = filter_file_lines($diff);
-            print "$diff\n";
+            print "$diff";
         } else {
             print "No changes between revision $rev1 and "
                 . "revision $rev2 configurations\n";
         }
+        system("rm $outfile2");
+        system("rm $outfile");
+    } elsif ($args eq 2) {
+        my $rev1 = $ARGV[0];
+        my $rev2 = $ARGV[1];
+        check_valid_rev($rev1);
+        check_valid_rev($rev2);
+        my $filename  = cm_commit_get_file_name($rev1);
+        my $filename2 = cm_commit_get_file_name($rev2);
+        my $outfile = $filename;
+        $outfile =~ s/(.*)\.gz/$1/g;
+        system("zcat $filename > $outfile");
+        my $outfile2 = $filename2;
+        $outfile2 =~ s/(.*)\.gz/$1/g;
+        system("zcat $filename2 > $outfile2");
+        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile --show-commands --show-show-defaults --show-context-diff`;
+        if (defined $diff and length($diff) > 0) {
+            my @difflines = split('\n', $diff);
+            foreach my $line (@difflines){
+              my @words = split(' ', $line);
+              my $elements = scalar(@words);
+              my @non_leaf = @words[0 .. ($elements - 2)] ;
+              my $path = join(' ', @non_leaf);
+              $path =~ s/'//g;
+              my $cmd = "$path " . @words[($elements - 1)];
+              print "$cmd\n";
+            }
+        } else {
+            print "No changes between revision $rev1 and "
+                . "revision $rev2 configurations\n";
+        }
+        system("rm $outfile2");
+        system("rm $outfile");
     }
     exit 0;
 }
