@@ -43,7 +43,7 @@ use POSIX;
 use IO::Zlib;
 
 
-my $commit_hook_dir  = '/etc/commit/';
+my $commit_hook_dir  = `cli-shell-api getPostCommitHookDir`;
 my $config_dir       = '/opt/vyatta/etc/config';
 my $archive_dir      = "$config_dir/archive";
 my $config_file      = "$config_dir/config.boot";
@@ -63,7 +63,7 @@ sub cm_get_config_rb {
 }
 
 sub cm_get_commit_hook_dir {
-    return $commit_hook_dir;
+    return "$commit_hook_dir/";
 }
 
 sub cm_get_archive_dir {

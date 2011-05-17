@@ -54,8 +54,10 @@ my $tmp_config_file  = "/tmp/config.boot.$$";
 
 my $commit_status = $ENV{'COMMIT_STATUS'};
 my $commit_via    = $ENV{'COMMIT_VIA'};
+my $commit_cmt    = $ENV{'COMMIT_COMMENT'};
 $commit_status = 'unknown' if !defined $commit_via;
 $commit_via    = 'other'   if !defined $commit_via;
+$commit_cmt    = 'commit'  if !defined $commit_cmt;
 
 if (! -d $archive_dir) {
     system("sudo mkdir $archive_dir");
@@ -75,7 +77,7 @@ if (! defined $rollback) {
 
 system("sudo logrotate -f -s $lr_state_file $lr_conf_file");
 my $user = getlogin() || getpwuid($>) || "unknown";
-cm_commit_add_log($user, $commit_via, $ARGV[0]);
+cm_commit_add_log($user, $commit_via, $commit_cmt);
 
 exit 0;
 
