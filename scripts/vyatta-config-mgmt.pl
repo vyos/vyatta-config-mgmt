@@ -273,12 +273,12 @@ if ($action eq 'diff') {
             print "No changes between working and active configurations\n";
             exit 0;
         }
-        my $tmp_config_file  = "/tmp/config.boot.$$";
-        system("cli-shell-api showCfg --show-active-only  > $tmp_config_file");
-        my $diff = `cli-shell-api showConfig --show-cfg1 $tmp_config_file --show-cfg2 \@WORKING --show-show-defaults --show-context-diff`;
+        my $show_args = '--show-show-defaults --show-context-diff';
+        # default behavior for showConfig is @ACTIVE vs. @WORKING, so no
+        # need to write to a file first
+        my $diff = `cli-shell-api showConfig $show_args`;
         if (defined $diff and length($diff) > 0) {
             print "$diff";
-            system("rm $tmp_config_file");
         } else {
             print "No changes between working and active configurations\n";
             exit 0;
