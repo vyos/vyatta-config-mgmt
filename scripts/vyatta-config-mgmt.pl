@@ -144,27 +144,17 @@ die "Error: no action"      if ! defined $action;
 
 my ($cmd, $rc) = ('', 1);
 
-if ($action eq 'add-uri') {
-    print "add-uri\n" if $debug;
+if ($action eq 'update-uri') {
+    print "update-uri\n" if $debug;
     my $config = new Vyatta::Config;
     $config->setLevel('system config-management commit-archive');
     my @uris = $config->returnValues('location');
     my $link = get_link($commit_uri_script);
-    if (scalar(@uris) >= 1 and ! -e $link) {
+    if (scalar(@uris) > 0 and ! -e $link) {
         print "add link [$link]\n" if $debug;
         $rc = system("ln -s $commit_uri_script $link");
         exit $rc;
-    }
-    exit 0;
-}
-
-if ($action eq 'del-uri') {
-    print "del-uri\n" if $debug;
-    my $config = new Vyatta::Config;
-    $config->setLevel('system config-management commit-archive');
-    my @uris = $config->returnValues('location');
-    if (scalar(@uris) <= 0) {
-        my $link = get_link($commit_uri_script);
+    } elsif (scalar(@uris) < 1 and -e $link) {
         print "remove link [$link]\n" if $debug;
         $rc = system("rm -f $link");
         exit $rc;
