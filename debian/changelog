@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.34+daisy1) unstable; urgency=low
+
+  * create daisy branch
+
+ -- John Southworth <john.southworth@vyatta.com>  Sat, 13 Oct 2012 13:30:51 -0700
+
 vyatta-config-mgmt (0.34) unstable; urgency=low
 
   * new branch
