@@ -11,5 +11,6 @@ Depends: perl,
  vyatta-cfg (>= 0.15.33),
  vyatta-cfg-system,
  vyatta-op,
+ liburi-perl,
 Description: Vyatta commands for config-mgmt
  Vyatta configuration/operational templates and scripts for the config management  system.
