@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.34+vyos2+lithium1) unstable; urgency=low
+
+  * New branch
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Thu, 11 Dec 2014 11:43:51 +0000
+ 
 vyatta-config-mgmt (0.34+vyos1+helium1) unstable; urgency=low
 
   * New branch
