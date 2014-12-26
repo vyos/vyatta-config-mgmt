@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.34+vyos2+lithium2) unstable; urgency=low
+
+  * Update maintainer address
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Fri, 26 Dec 2014 09:34:21 +0000
+ 
 vyatta-config-mgmt (0.34+vyos2+lithium1) unstable; urgency=low
 
   * New branch
