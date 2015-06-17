@@ -1,3 +1,9 @@
+vyatta-config-mgmt (0.34+vyos2+lithium3) unstable; urgency=low
+
+  * vyatta-config-mgmt: update dh_gencontrol with new development flag
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Wed, 17 Jun 2015 19:53:19 +0100
+ 
 vyatta-config-mgmt (0.34+vyos2+lithium2) unstable; urgency=low
 
   * Update maintainer address
