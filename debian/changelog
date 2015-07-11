@@ -1,3 +1,11 @@
+vyatta-config-mgmt (0.34+vyos2+lithium4) unstable; urgency=low
+
+  [ Alex Harpin ]
+  * vyatta-config-mgmt: config archive fails on unknown ssh host key
+  * vyatta-config-mgmt: set the saved config filename to use vyos
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 11 Jul 2015 15:23:22 +0100
+ 
 vyatta-config-mgmt (0.34+vyos2+lithium3) unstable; urgency=low
 
   * vyatta-config-mgmt: update dh_gencontrol with new development flag
