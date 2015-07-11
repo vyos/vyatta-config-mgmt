@@ -39,6 +39,7 @@ use File::Compare;
 use File::Copy;
 use URI;
 use Sys::Hostname;
+use IO::Prompt;
 
 
 my $debug = 0;
@@ -73,7 +74,7 @@ foreach my $uri (@uris) {
     my $scheme = $u->scheme();
     my $auth   = $u->authority();
     my $path   = $u->path();
-    my ($host, $remote) = ('', '');
+    my ($host, $remote, $cmd) = ('', '', '');
     if (defined $auth and $auth =~ /.*\@(.*)/) {
         $host = $1;
     } else {
@@ -82,15 +83,41 @@ foreach my $uri (@uris) {
     $remote .= "$scheme://$host";
     $remote .= "$path" if defined $path;
     print "  $remote ";
-    my $cmd = "curl -s -T $tmp_push_file $uri/$save_file";
+
+    my $rc = 0;
+    if ($scheme eq 'scp' ){
+        $cmd = "curl -s -S -T $tmp_push_file $uri/$save_file";
+        $rc = system($cmd);
+        if( $rc >> 8 == 51 ){
+            my $rsa_key = `ssh-keyscan -t rsa $host 2>/dev/null`;
+            print "The authenticity of host '$host' can't be established.\n";
+            my $fingerprint = `ssh-keygen -lf /dev/stdin <<< \"$rsa_key\" | awk {' print \$2 '}`;
+            chomp $fingerprint;
+            print "RSA key fingerprint is $fingerprint.\n";
+            if (prompt("Are you sure you want to continue connecting (yes/no) [Yes]? ", -tynd=>"y")) {
+                mkdir "$ENV{HOME}/.ssh/",0700 unless -d "$ENV{HOME}/.ssh";
+                open(my $known_hosts, ">>", "$ENV{HOME}/.ssh/known_hosts")
+                    or die "Cannot open known_hosts: $!";
+                print $known_hosts "$rsa_key\n";
+                close($known_hosts);
+                $cmd = "curl -s -S -T $tmp_push_file $uri/$save_file";
+                $rc = system($cmd);
+                print "\n";
+            }
+        }
+    } else {
+        $cmd = "curl -s -T $tmp_push_file $uri/$save_file";
+        $rc = system($cmd);
+    }
+
     print "cmd [$cmd]\n" if $debug;
-    my $rc = system($cmd);
     if ($rc eq 0) {
         print " OK\n";
     } else {
-        print " failed\n";
+        print " Failed!\n";
     }
 }
+
 move($tmp_push_file, $last_push_file);
 
 exit 0;
