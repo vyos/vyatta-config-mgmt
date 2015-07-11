@@ -65,7 +65,7 @@ if (-e $last_push_file and compare($last_push_file, $tmp_push_file) == 0) {
 
 my $timestamp = strftime(".%Y%m%d_%H%M%S", localtime);
 my $hostname = hostname();
-$hostname = 'vyatta' if ! defined $hostname;
+$hostname = 'vyos' if ! defined $hostname;
 my $save_file = "config.boot-$hostname" . $timestamp;
 
 print "Archiving config...\n";
