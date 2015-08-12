@@ -1,3 +1,12 @@
+vyatta-config-mgmt (0.34+vyos1+helium2) unstable; urgency=low
+
+  [ Alex Harpin ]
+  * vyatta-config-mgmt: config archive fails on unknown ssh host key
+
+  [ Daniil Baturin ]
+
+ -- Daniil Baturin <daniil@baturin.org>  Wed, 12 Aug 2015 04:06:02 +0200
+
 vyatta-config-mgmt (0.34+vyos1+helium1) unstable; urgency=low
 
   * New branch
