@@ -175,6 +175,7 @@ if ($action eq 'valid-uri') {
     if ($scheme eq 'tftp') {
     } elsif ($scheme eq 'ftp') {
     } elsif ($scheme eq 'scp') {
+    } elsif ($scheme eq 'sftp') {
     } else {
         print "Unsupported URI scheme\n";
         exit 1;
