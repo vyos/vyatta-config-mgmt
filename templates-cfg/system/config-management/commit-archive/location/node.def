@@ -9,5 +9,6 @@ syntax:expression: exec "/opt/vyatta/sbin/vyatta-config-mgmt.pl \
 val_help: <uri> ; Uniform Resource Identifier
 comp_help: 
   "scp://<user>:<passwd>@<host>/<dir>"
+  "sftp://<user>:<passwd>@<host>/<dir>"
   "ftp://<user>:<passwd>@<host>/<dir>"
   "tftp://<host>/<dir>"

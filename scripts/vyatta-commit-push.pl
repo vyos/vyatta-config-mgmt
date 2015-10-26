@@ -85,7 +85,7 @@ foreach my $uri (@uris) {
     print "  $remote ";
 
     my $rc = 0;
-    if ($scheme eq 'scp' ){
+    if ($scheme =~ /^(scp|sftp)$/ ){
         $cmd = "curl -s -S -T $tmp_push_file $uri/$save_file";
         $rc = system($cmd);
         if( $rc >> 8 == 51 ){
