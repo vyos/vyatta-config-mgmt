@@ -1,3 +1,12 @@
+vyatta-config-mgmt (0.34+vyos2+lithium5) unstable; urgency=low
+
+  [ Elon ]
+  * Bug 584 - Allow sftp as copy and commit-archive location destination
+  
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Mon, 26 Oct 2015 22:43:59 +0000
+ 
 vyatta-config-mgmt (0.34+vyos2+lithium4) unstable; urgency=low
 
   [ Alex Harpin ]
