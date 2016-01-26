@@ -202,6 +202,7 @@ if ($action eq 'update-revs') {
             system("sudo chmod 775 $archive_dir");
         }
         my $lr_conf = "$config_file {\n";
+        $lr_conf   .= "\t su root vyattacfg\n";
         $lr_conf   .= "\t rotate $revs\n";
         $lr_conf   .= "\t start 0\n";
         $lr_conf   .= "\t compress \n";
