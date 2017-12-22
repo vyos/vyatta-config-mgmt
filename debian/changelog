@@ -1,3 +1,10 @@
+vyatta-config-mgmt (0.34+vyos2+current2) unstable; urgency=medium
+
+  [ Christian Poessinger }
+  * Switch off cURL "URL globbing parser" (T504)
+
+ -- Christian Poessinger <christian@poessinger.com>  Fri, 22 Dec 2017 18:03:57 +0100
+
 vyatta-config-mgmt (0.34+vyos2+current1) unstable; urgency=medium
 
   [ Thomas Jepp ]

@@ -86,7 +86,7 @@ foreach my $uri (@uris) {
 
     my $rc = 0;
     if ($scheme =~ /^(scp|sftp)$/ ){
-        $cmd = "curl -s -S -T $tmp_push_file $uri/$save_file";
+        $cmd = "curl -g -s -S -T $tmp_push_file $uri/$save_file";
         $rc = system($cmd);
         if( $rc >> 8 == 51 ){
             my $rsa_key = `ssh-keyscan -t rsa $host 2>/dev/null`;
@@ -100,7 +100,7 @@ foreach my $uri (@uris) {
                     or die "Cannot open known_hosts: $!";
                 print $known_hosts "$rsa_key\n";
                 close($known_hosts);
-                $cmd = "curl -s -S -T $tmp_push_file $uri/$save_file";
+                $cmd = "curl -g -s -S -T $tmp_push_file $uri/$save_file";
                 $rc = system($cmd);
                 print "\n";
             }
