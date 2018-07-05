@@ -114,6 +114,23 @@ sub filter_version_string {
     return join("\n", @lines);
 }
 
+sub format_commands {
+    my ($diff) = @_;
+
+    my @difflines = split('\n', $diff);
+    my @cmds = ();
+    foreach my $line (@difflines){
+      my @words = split(' ', $line);
+      my $elements = scalar(@words);
+      my @non_leaf = @words[0 .. ($elements - 2)] ;
+      my $path = join(' ', @non_leaf);
+      $path =~ s/'//g;
+      my $cmd = "$path " . @words[($elements - 1)];
+      push(@cmds, $cmd);
+    }
+    my $results = join("\n", @cmds);
+    return "$results\n";
+}
 
 #
 # main
@@ -253,17 +270,30 @@ if ($action eq 'show-commit-file') {
 if ($action eq 'diff') {
     print "diff\n" if $debug;    
     my $args = $#ARGV;
+    my $show_args = '--show-show-defaults --show-context-diff';
+
+    # flag for command style output
+    my $is_command_format = 0;
+    if ($args >= 0 and $ARGV[$args] eq 'commands') {
+        $is_command_format = 1;
+        $show_args = '$show_args --show-commands';
+        delete($ARGV[$args]);
+        $args--;
+    }
+
     if ($args < 0) {
         my $rc = system("cli-shell-api sessionChanged");
         if (defined $rc and $rc > 0) {
             print "No changes between working and active configurations.\n";
             exit 0;
         }
-        my $show_args = '--show-show-defaults --show-context-diff';
         # default behavior for showConfig is @ACTIVE vs. @WORKING, so no
         # need to write to a file first
         my $diff = `cli-shell-api showConfig $show_args`;
         if (defined $diff and length($diff) > 0) {
+            if ($is_command_format) {
+                $diff = format_commands($diff);
+            }
             print "$diff";
         } else {
             print "No changes between working and active configurations.\n";
@@ -276,8 +306,11 @@ if ($action eq 'diff') {
         my $outfile = $filename1;
         $outfile =~ s/(.*)\.gz/$1/g;
         system("zcat $filename1 > $outfile");
-        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile --show-cfg2 \@WORKING --show-show-defaults --show-context-diff`;
+        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile --show-cfg2 \@WORKING $show_args`;
         if (defined $diff and length($diff) > 0) {
+            if ($is_command_format) {
+                $diff = format_commands($diff);
+            }
             print "$diff";
         } else {
             print "No changes between working and "
@@ -297,8 +330,11 @@ if ($action eq 'diff') {
         my $outfile2 = $filename2;
         $outfile2 =~ s/(.*)\.gz/$1/g;
         system("zcat $filename2 > $outfile2");
-        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile --show-show-defaults --show-context-diff`;
+        my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile $show_args`;
         if (defined $diff and length($diff) > 0) {
+            if ($is_command_format) {
+                $diff = format_commands($diff);
+            }
             print "$diff";
         } else {
             print "No changes between revision $rev1 and "
@@ -321,16 +357,8 @@ if ($action eq 'diff') {
         system("zcat $filename2 > $outfile2");
         my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile --show-commands --show-show-defaults --show-context-diff`;
         if (defined $diff and length($diff) > 0) {
-            my @difflines = split('\n', $diff);
-            foreach my $line (@difflines) {
-                my @words = split(' ', $line);
-                my $elements = scalar(@words);
-                my @non_leaf = @words[0 .. ($elements - 2)] ;
-                my $path = join(' ', @non_leaf);
-                $path =~ s/'//g;
-                my $cmd = "$path " . @words[($elements - 1)];
-                print "$cmd\n";
-            }
+            my $commands = format_commands($diff);
+            print "$commands"
         } else {
             print "No changes between revision $rev1 and "
                 . "revision $rev2 configurations.\n";
