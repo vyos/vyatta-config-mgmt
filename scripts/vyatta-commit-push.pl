@@ -56,7 +56,7 @@ if (scalar(@uris) < 1) {
 my $last_push_file = cm_get_last_push_file();
 my $tmp_push_file  = "/tmp/config.boot.$$";
 
-my $cmd = 'cli-shell-api showCfg --show-active-only';
+my $cmd = 'cli-shell-api showConfig --show-ignore-edit --show-active-only';
 system("$cmd > $tmp_push_file");
 
 if (-e $last_push_file and compare($last_push_file, $tmp_push_file) == 0) {
