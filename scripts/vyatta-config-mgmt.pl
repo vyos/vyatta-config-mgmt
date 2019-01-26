@@ -209,6 +209,11 @@ if ($action eq 'update-revs') {
         $lr_conf   .= "\t copy \n";
         $lr_conf   .= "}\n";
         cm_write_file($lr_conf_file, $lr_conf);
+
+        # logrotate doesn't like when its config is writeable
+        # for anyone but root
+        system("sudo chmod 644 $lr_conf_file");
+
         my $num_revs = cm_get_num_revs();
         if (! -e "$archive_dir/commits" or $num_revs == 0) {
             # store a baseline config
