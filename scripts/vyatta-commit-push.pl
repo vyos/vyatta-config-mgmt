@@ -68,6 +68,13 @@ my $hostname = hostname();
 $hostname = 'vyos' if ! defined $hostname;
 my $save_file = "config.boot-$hostname" . $timestamp;
 
+my $source_addr = $config->returnEffectiveValue('source-address');
+my $src_opt = "";
+if( defined($source_addr) ) {
+    $src_opt = "--interface $source_addr";
+    print("Using source address $source_addr\n");
+}
+
 print "Archiving config...\n";
 foreach my $uri (@uris) {
     my $u      = URI->new($uri);
@@ -100,13 +107,13 @@ foreach my $uri (@uris) {
                     or die "Cannot open known_hosts: $!";
                 print $known_hosts "$rsa_key\n";
                 close($known_hosts);
-                $cmd = "curl -g -s -S -T $tmp_push_file $uri/$save_file";
+                $cmd = "curl $src_opt -g -s -S -T $tmp_push_file $uri/$save_file";
                 $rc = system($cmd);
                 print "\n";
             }
         }
     } else {
-        $cmd = "curl -s -T $tmp_push_file $uri/$save_file";
+        $cmd = "curl $src_opt -s -T $tmp_push_file $uri/$save_file";
         $rc = system($cmd);
     }
 
