@@ -1,3 +1,9 @@
+vyatta-config-mgmt (1.2.4) unstable; urgency=low
+
+  * New release.
+
+ -- VyOS maintainers <maintainers@vyos.io>  Tue, 10 Dec 2019 23:40:06 +0200
+
 vyatta-config-mgmt (1.2.0-1) stable; urgency=medium
 
   * New branch.
@@ -287,4 +293,3 @@ vyatta-config-mgmt (0.1) unstable; urgency=low
   * Initial Release.
 
  -- Stig Thormodsrud <stig@vyatta.com>  Tue, 26 Oct 2010 10:54:14 -0700
-
