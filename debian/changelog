@@ -1,3 +1,9 @@
+vyatta-config-mgmt (1.2.5) unstable; urgency=low
+
+  * New release.
+
+ -- VyOS maintainers <maintainers@vyos.io>  Mon, 09 Mar 2020 18:47:54 +0200
+
 vyatta-config-mgmt (1.2.4) unstable; urgency=low
 
   * New release.
