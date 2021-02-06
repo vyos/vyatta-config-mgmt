@@ -48,7 +48,8 @@ my $commit_hook_dir  = cm_get_commit_hook_dir();
 my $archive_dir      = cm_get_archive_dir();
 my $config_file      = "$archive_dir/config.boot";
 my $lr_conf_file     = cm_get_lr_conf_file();
-my $confirm_job_file = '/var/run/confirm.job';
+
+my $job_name = "commit-confirm";
 
 my $debug = 0;
 
@@ -83,18 +84,6 @@ sub check_valid_rev {
     return 1 if $rev <= $num_revs;
     print "Invalid revision [$rev]\n";
     exit 1;
-}
-
-sub parse_at_output {
-    my @lines = @_;
-    foreach my $line (@lines) {
-        if ($line =~ /error/) {
-            return (1, '', '');
-        } elsif ($line =~ /job (\d+) (.*)$/) {
-            return (0, $1, $2);
-        } 
-    }
-    return (1, '', '');
 }
 
 sub filter_file_lines {
@@ -177,7 +166,7 @@ if ($action eq 'valid-uri') {
     } elsif ($scheme eq 'scp') {
     } elsif ($scheme eq 'sftp') {
     } else {
-        print "Unsupported URI scheme\n";
+        print "Unsupported URI scheme.\n";
         exit 1;
     }
     exit 0;
@@ -267,7 +256,7 @@ if ($action eq 'diff') {
     if ($args < 0) {
         my $rc = system("cli-shell-api sessionChanged");
         if (defined $rc and $rc > 0) {
-            print "No changes between working and active configurations\n";
+            print "No changes between working and active configurations.\n";
             exit 0;
         }
         my $show_args = '--show-show-defaults --show-context-diff';
@@ -277,7 +266,7 @@ if ($action eq 'diff') {
         if (defined $diff and length($diff) > 0) {
             print "$diff";
         } else {
-            print "No changes between working and active configurations\n";
+            print "No changes between working and active configurations.\n";
             exit 0;
         }
     } elsif ($args eq 0) {
@@ -292,7 +281,7 @@ if ($action eq 'diff') {
             print "$diff";
         } else {
             print "No changes between working and "
-                . "revision $rev1 configurations\n";
+                . "revision $rev1 configurations.\n";
         }
         system("rm $outfile");
     } elsif ($args eq 1) {
@@ -313,7 +302,7 @@ if ($action eq 'diff') {
             print "$diff";
         } else {
             print "No changes between revision $rev1 and "
-                . "revision $rev2 configurations\n";
+                . "revision $rev2 configurations.\n";
         }
         system("rm $outfile2");
         system("rm $outfile");
@@ -333,18 +322,18 @@ if ($action eq 'diff') {
         my $diff = `cli-shell-api showConfig --show-cfg1 $outfile2 --show-cfg2 $outfile --show-commands --show-show-defaults --show-context-diff`;
         if (defined $diff and length($diff) > 0) {
             my @difflines = split('\n', $diff);
-            foreach my $line (@difflines){
-              my @words = split(' ', $line);
-              my $elements = scalar(@words);
-              my @non_leaf = @words[0 .. ($elements - 2)] ;
-              my $path = join(' ', @non_leaf);
-              $path =~ s/'//g;
-              my $cmd = "$path " . @words[($elements - 1)];
-              print "$cmd\n";
+            foreach my $line (@difflines) {
+                my @words = split(' ', $line);
+                my $elements = scalar(@words);
+                my @non_leaf = @words[0 .. ($elements - 2)] ;
+                my $path = join(' ', @non_leaf);
+                $path =~ s/'//g;
+                my $cmd = "$path " . @words[($elements - 1)];
+                print "$cmd\n";
             }
         } else {
             print "No changes between revision $rev1 and "
-                . "revision $rev2 configurations\n";
+                . "revision $rev2 configurations.\n";
         }
         system("rm $outfile2");
         system("rm $outfile");
@@ -353,23 +342,27 @@ if ($action eq 'diff') {
 }
 
 if ($action eq 'commit-confirm') {
-    die "Error: no minutes" if ! defined $minutes;
+    die "Error: no minutes defined." if ! defined $minutes;
     print "commit-confirm [$minutes]\n" if $debug;
-    if (-e $confirm_job_file) {
-        print "Another confirm is pending\n";
+
+    # Check if there's already a timer.
+    system("systemctl is-active --quiet ${job_name}.timer");
+    if ($? == 0) {
+        print "Another confirm is pending.\n";
         exit 0;
     }
+
     my $max_revs = cm_get_max_revs();
     if (!defined $max_revs or $max_revs <= 0) {
         print "commit-revisions is not configured.\n\n";
         exit 1;
     }
     check_integer($minutes);
-    print "commit confirm will be automatically reboot in $minutes"
-        . " minutes unless confirmed\n";
-    if (prompt("Proceed? [confirm]", -y1d=>"y")) {
+    print "commit-confirm will automatically reboot in $minutes"
+        . " minutes unless changes are confirmed.\n";
+    if (prompt("Proceed?", -y1d=>"y")) {
     } else {
-        print "commit-confirm canceled\n";
+        print "commit-confirm canceled.\n";
         exit 1;
     }
 
@@ -378,29 +371,37 @@ if ($action eq 'commit-confirm') {
     $rollback_config .= "\n";
     my $config_rb = cm_get_config_rb();
     cm_write_file($config_rb, $rollback_config);
-    
-    $cmd = "/opt/vyatta/sbin/vyatta-config-mgmt.pl --action rollback" 
-         . " --file $config_rb";
-    @lines = `echo sudo sg vyattacfg \\"$cmd\\" | at now + $minutes minutes 2>&1`;
-    my ($err, $job, $time) = parse_at_output(@lines);
-    if ($err) {
-        print "Error: unable to schedule reboot\n";
+
+    my $command = "/opt/vyatta/sbin/vyatta-config-mgmt.pl --action rollback "
+        . "--file $config_rb";
+    # Schedule a systemd timer to run rollback $minutes later.
+    system("sudo systemd-run --quiet --on-active=${minutes}m --unit=${job_name} "
+           . "sg vyattacfg \"${command}\"");
+    # Check if the timer was created.
+    system("systemctl is-active --quiet ${job_name}.timer");
+    if ($? != 0) {
+        print "Error: unable to schedule reboot.\n";
         exit 1;
     }
-    system("echo $job > $confirm_job_file");
+    print "Reboot scheduled for commit-confirm. "
+        . "Confirm your changes to cancel the reboot.\n";
+    # Call the script to notify the users of the impending reboot.
+    system("sudo -b /opt/vyatta/sbin/commit-confirm-notify.py ${minutes}");
     exit 0;
 }
 
 if ($action eq 'confirm') {
-    if (! -e $confirm_job_file) {
-        print "No confirm pending\n";
-        exit 0;
+    # Check if timer exists.
+    system("systemctl is-active --quiet ${job_name}.timer");
+    if ($? != 0) {
+        print "No confirm pending.\n";
+    } else {
+        # If so, stop it.
+        system("sudo systemctl stop --quiet ${job_name}.timer");
+        # Kill the notification daemon if it's still running.
+        system("sudo pkill -f commit-confirm-notify.py");
+        print "Reboot timer stopped.\n";
     }
-    my $job = `cat $confirm_job_file`;
-    chomp $job;
-    system("sudo atrm $job");
-    system("sudo rm -f $confirm_job_file");
-    # log confirm
     exit 0;
 }
 
