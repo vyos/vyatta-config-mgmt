@@ -9,6 +9,7 @@ curver_DATA = cfg-version/config-management@1
 sbin_SCRIPTS  = scripts/vyatta-commit-push.pl
 sbin_SCRIPTS += scripts/vyatta-commit-revs.pl
 sbin_SCRIPTS += scripts/vyatta-config-mgmt.pl
+sbin_SCRIPTS += scripts/commit-confirm-notify.py
 
 bin_sudo_users_SCRIPTS  = 
 
