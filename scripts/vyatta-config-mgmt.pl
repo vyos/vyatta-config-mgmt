@@ -386,7 +386,7 @@ if ($action eq 'commit-confirm') {
     print "Reboot scheduled for commit-confirm. "
         . "Confirm your changes to cancel the reboot.\n";
     # Call the script to notify the users of the impending reboot.
-    system("sudo -b /opt/vyatta/sbin/commit-confirm-notify.py ${minutes}");
+    system("sudo -b /usr/libexec/vyos/commit-confirm-notify.py ${minutes}");
     exit 0;
 }
 
