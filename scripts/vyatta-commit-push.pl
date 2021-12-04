@@ -97,7 +97,7 @@ foreach my $uri (@uris) {
     $remote .= "$path" if defined $path;
     print "  $remote ";
 
-    system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\", source=$source_address)'");
+    system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\", source_host=$source_address)'");
 }
 
 move($tmp_push_file, $last_push_file);
