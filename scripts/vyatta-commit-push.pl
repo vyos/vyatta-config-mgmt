@@ -73,13 +73,9 @@ my $source_address = $config->returnEffectiveValue('source-address');
 # If so, we're going to pass that to the Python funcall.
 if (defined($source_address)) {
     print("Using source address $source_address\n");
-    # The string needs to be wrapped in quotes.
-    $source_address = '"' . $source_address . '"';
 }
-# Otherwise, we're going to pass None.
-else {
-    $source_address = "None";
-}
+# The string needs to be wrapped in quotes, even if it's empty.
+$source_address = '"' . $source_address . '"';
 
 print "Archiving config...\n";
 foreach my $uri (@uris) {
@@ -97,12 +93,7 @@ foreach my $uri (@uris) {
     $remote .= "$path" if defined $path;
     print "  $remote ";
 
-    # Don't set var 'source_host' if 'source-address' not in configuration
-    if ($source_address eq "None") {
-        system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\")'");
-    } else {
-        system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\", source_host=$source_address)'");
-    }
+    system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\", source_host=$source_address)'");
 }
 
 move($tmp_push_file, $last_push_file);
