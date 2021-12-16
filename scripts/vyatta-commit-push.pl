@@ -68,12 +68,14 @@ my $hostname = hostname();
 $hostname = 'vyos' if ! defined $hostname;
 my $save_file = "config.boot-$hostname" . $timestamp;
 
-my $source_addr = $config->returnEffectiveValue('source-address');
-my $src_opt = "";
-if( defined($source_addr) ) {
-    $src_opt = "--interface $source_addr";
-    print("Using source address $source_addr\n");
+# Was a source address specified?
+my $source_address = $config->returnEffectiveValue('source-address');
+# If so, we're going to pass that to the Python funcall.
+if (defined($source_address)) {
+    print("Using source address $source_address\n");
 }
+# The string needs to be wrapped in quotes, even if it's empty.
+$source_address = '"' . $source_address . '"';
 
 print "Archiving config...\n";
 foreach my $uri (@uris) {
@@ -91,38 +93,7 @@ foreach my $uri (@uris) {
     $remote .= "$path" if defined $path;
     print "  $remote ";
 
-    my $rc = 0;
-    if ($scheme =~ /^(scp|sftp)$/ ){
-        $cmd = "curl -g -s -S -T $tmp_push_file $uri/$save_file";
-        $rc = system($cmd);
-        if( $rc >> 8 == 51 ){
-            my $rsa_key = `ssh-keyscan -t rsa $host 2>/dev/null`;
-            print "The authenticity of host '$host' can't be established.\n";
-            my $fingerprint = `ssh-keygen -lf /dev/stdin <<< \"$rsa_key\" | awk {' print \$2 '}`;
-            chomp $fingerprint;
-            print "RSA key fingerprint is $fingerprint.\n";
-            if (prompt("Are you sure you want to continue connecting (yes/no) [Yes]? ", -tynd=>"y")) {
-                mkdir "$ENV{HOME}/.ssh/",0700 unless -d "$ENV{HOME}/.ssh";
-                open(my $known_hosts, ">>", "$ENV{HOME}/.ssh/known_hosts")
-                    or die "Cannot open known_hosts: $!";
-                print $known_hosts "$rsa_key\n";
-                close($known_hosts);
-                $cmd = "curl $src_opt -g -s -S -T $tmp_push_file $uri/$save_file";
-                $rc = system($cmd);
-                print "\n";
-            }
-        }
-    } else {
-        $cmd = "curl $src_opt -s -T $tmp_push_file $uri/$save_file";
-        $rc = system($cmd);
-    }
-
-    print "cmd [$cmd]\n" if $debug;
-    if ($rc eq 0) {
-        print " OK\n";
-    } else {
-        print " Failed!\n";
-    }
+    system("python3 -c 'from vyos.remote import upload; upload(\"$tmp_push_file\", \"$uri/$save_file\", source_host=$source_address)'");
 }
 
 move($tmp_push_file, $last_push_file);
