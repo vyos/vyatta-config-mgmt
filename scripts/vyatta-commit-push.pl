@@ -74,6 +74,9 @@ my $source_address = $config->returnEffectiveValue('source-address');
 if (defined($source_address)) {
     print("Using source address $source_address\n");
 }
+else {
+    $source_address = '';
+}
 # The string needs to be wrapped in quotes, even if it's empty.
 $source_address = '"' . $source_address . '"';
 
