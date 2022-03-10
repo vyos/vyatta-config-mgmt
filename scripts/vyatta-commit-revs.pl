@@ -64,7 +64,7 @@ if (! -d $archive_dir) {
     system("sudo chown vyatta:vyattacfg $archive_dir");
 }
 if (! defined $rollback) {
-    my $cmd = '/usr/libexec/vyos/vyos-save-config.py';
+    my $cmd = '/opt/vyatta/sbin/vyatta-save-config.pl';
     system("$cmd $tmp_config_file > /dev/null");
     if (compare($tmp_config_file, $last_commit_file) == 0) {
         exit 0;
